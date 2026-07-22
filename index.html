@@ -1,0 +1,336 @@
+<!doctype html>
+<html lang="my">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>n8n Course Studio — Burmese Lesson Pipeline</title>
+<meta name="description" content="AI-powered studio to turn n8n lessons into narrated, animated Burmese course videos — script, voiceover, visuals, render and QA in one pipeline." />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&family=Padauk:wght@400;700&display=swap" rel="stylesheet" />
+<style>
+  :root{
+    --bg:#0d0d13; --bg-2:#111119; --surface:#16161f; --surface-2:#1c1c27;
+    --border:#26263300; --border-1:rgba(255,255,255,.09); --border-2:rgba(255,255,255,.16);
+    --text:#ececef; --muted:#9a9cae; --faint:#6a6c7e;
+    --pink:#ea4b71; --pink-soft:#ff789a; --orange:#ff6d3d; --violet:#8b7bff;
+    --ok:#35b77e; --warn:#f5a623; --err:#e45157;
+    --accent-grad:linear-gradient(135deg,#ea4b71,#ff6d3d);
+    --r:14px; --r-sm:10px; --r-lg:20px;
+    --sp:8px; --shadow:0 18px 48px rgba(0,0,0,.5);
+    --sans:"Inter","Padauk","Noto Sans Myanmar",system-ui,sans-serif;
+    --display:"Space Grotesk","Inter",sans-serif;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    margin:0;font-family:var(--sans);background:var(--bg);color:var(--text);
+    line-height:1.6;-webkit-font-smoothing:antialiased;
+    background-image:radial-gradient(60% 55% at 82% -8%,rgba(234,75,113,.16),transparent 60%),radial-gradient(50% 45% at 8% 4%,rgba(139,123,255,.13),transparent 60%);
+    background-attachment:fixed;min-height:100dvh;
+  }
+  .mm{font-family:"Padauk","Noto Sans Myanmar",var(--sans)}
+  a{color:inherit}
+  :focus-visible{outline:2px solid var(--pink-soft);outline-offset:2px;border-radius:6px}
+  .wrap{max-width:1120px;margin:0 auto;padding:0 20px}
+
+  /* Topbar */
+  header.top{position:sticky;top:0;z-index:40;backdrop-filter:blur(12px);
+    background:rgba(13,13,19,.72);border-bottom:1px solid var(--border-1)}
+  .top-in{display:flex;align-items:center;gap:14px;height:64px}
+  .brand{display:flex;align-items:center;gap:11px;font-family:var(--display);font-weight:700;font-size:17px;letter-spacing:-.2px}
+  .logo{width:34px;height:34px;border-radius:10px;background:var(--accent-grad);display:grid;place-items:center;box-shadow:0 6px 18px rgba(234,75,113,.4)}
+  .logo svg{width:19px;height:19px;color:#fff}
+  .brand small{display:block;font-family:var(--sans);font-weight:400;font-size:11px;color:var(--muted);letter-spacing:0}
+  .top-sp{flex:1}
+  .pill{display:inline-flex;align-items:center;gap:7px;font-size:12.5px;color:var(--muted);
+    background:var(--surface);border:1px solid var(--border-1);padding:7px 12px;border-radius:999px}
+  .dot{width:8px;height:8px;border-radius:50%;background:var(--ok);box-shadow:0 0 0 4px rgba(53,183,126,.18)}
+  .btn-ghost{display:inline-flex;align-items:center;gap:7px;height:40px;padding:0 14px;border-radius:var(--r-sm);
+    color:var(--text);text-decoration:none;background:var(--surface);border:1px solid var(--border-1);font-size:13.5px;font-weight:500;transition:.18s}
+  .btn-ghost:hover{border-color:var(--border-2);background:var(--surface-2)}
+  .btn-ghost svg{width:16px;height:16px}
+
+  /* Hero */
+  .hero{padding:66px 0 30px;text-align:center}
+  .kicker{display:inline-flex;align-items:center;gap:8px;font-size:12.5px;font-weight:600;letter-spacing:.3px;
+    color:var(--pink-soft);background:rgba(234,75,113,.1);border:1px solid rgba(234,75,113,.28);padding:6px 13px;border-radius:999px}
+  .hero h1{font-family:var(--display);font-size:clamp(34px,6vw,58px);line-height:1.05;margin:20px 0 0;letter-spacing:-1.4px;font-weight:700}
+  .hero h1 .g{background:var(--accent-grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+  .hero p{max-width:620px;margin:18px auto 0;color:var(--muted);font-size:clamp(15px,2.2vw,18px)}
+  .hero .cta{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:28px}
+  .btn{display:inline-flex;align-items:center;gap:9px;height:48px;padding:0 22px;border:0;border-radius:var(--r-sm);
+    font-family:var(--sans);font-size:15px;font-weight:600;cursor:pointer;transition:.18s;text-decoration:none}
+  .btn.primary{background:var(--accent-grad);color:#fff;box-shadow:0 10px 26px rgba(234,75,113,.36)}
+  .btn.primary:hover{transform:translateY(-1px);box-shadow:0 14px 32px rgba(234,75,113,.46)}
+  .btn.subtle{background:var(--surface);color:var(--text);border:1px solid var(--border-1)}
+  .btn.subtle:hover{border-color:var(--border-2)}
+  .btn svg{width:18px;height:18px}
+  .stat-row{display:flex;gap:26px;justify-content:center;flex-wrap:wrap;margin-top:40px;color:var(--muted);font-size:13.5px}
+  .stat-row b{color:var(--text);font-family:var(--display);font-size:22px;display:block;line-height:1.1}
+  .stat-row div{text-align:center}
+
+  /* Stepper / tabs */
+  .studio{padding:26px 0 90px}
+  .steps{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:22px}
+  .step{position:relative;display:flex;flex-direction:column;gap:8px;text-align:left;cursor:pointer;
+    background:var(--surface);border:1px solid var(--border-1);border-radius:var(--r);padding:14px 15px;transition:.18s;color:var(--text)}
+  .step:hover{border-color:var(--border-2);background:var(--surface-2)}
+  .step[aria-selected="true"]{border-color:transparent;background:linear-gradient(var(--surface-2),var(--surface-2)) padding-box,var(--accent-grad) border-box;border:1px solid transparent;box-shadow:0 8px 24px rgba(234,75,113,.14)}
+  .step .n{width:26px;height:26px;border-radius:8px;display:grid;place-items:center;font-family:var(--display);font-weight:700;font-size:13px;background:var(--bg-2);border:1px solid var(--border-1);color:var(--muted)}
+  .step[aria-selected="true"] .n{background:var(--accent-grad);color:#fff;border-color:transparent}
+  .step .t{font-weight:600;font-size:14px}
+  .step .d{font-size:11.5px;color:var(--faint)}
+
+  /* Panel card */
+  .panel{display:none;background:var(--surface);border:1px solid var(--border-1);border-radius:var(--r-lg);
+    box-shadow:var(--shadow);overflow:hidden;animation:rise .3s ease}
+  .panel.on{display:block}
+  @keyframes rise{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+  .panel-h{display:flex;align-items:center;gap:14px;padding:22px 24px;border-bottom:1px solid var(--border-1)}
+  .panel-h .ico{width:42px;height:42px;border-radius:12px;background:rgba(234,75,113,.12);border:1px solid rgba(234,75,113,.25);display:grid;place-items:center;color:var(--pink-soft);flex:none}
+  .panel-h .ico svg{width:21px;height:21px}
+  .panel-h h2{margin:0;font-family:var(--display);font-size:20px;font-weight:600;letter-spacing:-.3px}
+  .panel-h p{margin:2px 0 0;color:var(--muted);font-size:13px}
+  .panel-b{padding:24px;display:grid;gap:18px}
+  .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  .field{display:grid;gap:7px}
+  .field label{font-size:13px;font-weight:500;color:var(--text)}
+  .field .hint{font-size:12px;color:var(--faint)}
+  .field .hint.mm{line-height:1.7}
+  input,select,textarea{width:100%;font-family:var(--sans);font-size:14.5px;color:var(--text);
+    background:var(--bg-2);border:1px solid var(--border-1);border-radius:var(--r-sm);padding:0 14px;height:46px;transition:.16s}
+  textarea{height:auto;min-height:120px;padding:12px 14px;resize:vertical;line-height:1.6}
+  input:hover,select:hover,textarea:hover{border-color:var(--border-2)}
+  input:focus,select:focus,textarea:focus{outline:none;border-color:var(--pink);box-shadow:0 0 0 3px rgba(234,75,113,.2)}
+  .actions{display:flex;gap:12px;flex-wrap:wrap;align-items:center;padding-top:2px}
+  .out{margin:0;background:var(--bg);border:1px solid var(--border-1);border-radius:var(--r-sm);padding:14px 16px;
+    font-family:"JetBrains Mono",ui-monospace,monospace;font-size:12.5px;color:var(--muted);white-space:pre-wrap;word-break:break-word;max-height:280px;overflow:auto}
+  .badge{font-size:11.5px;font-weight:600;padding:4px 9px;border-radius:999px}
+  .badge.auto{color:var(--ok);background:rgba(53,183,126,.12)}
+  .badge.you{color:var(--warn);background:rgba(245,166,35,.12)}
+
+  /* Component library grid */
+  .lib-bar{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+  .lib-count{font-size:13px;color:var(--muted)}
+  .lib-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:14px}
+  .card{background:var(--bg-2);border:1px solid var(--border-1);border-radius:var(--r);overflow:hidden;transition:.18s}
+  .card:hover{border-color:var(--border-2);transform:translateY(-2px)}
+  .card .prev{height:104px;background:radial-gradient(circle at 30% 30%,#20202c,#131319);display:grid;place-items:center;border-bottom:1px solid var(--border-1)}
+  .card .prev .chip{font-family:"JetBrains Mono",monospace;font-size:11px;color:var(--pink-soft);border:1px solid rgba(234,75,113,.3);background:rgba(234,75,113,.08);padding:4px 9px;border-radius:7px}
+  .card .prev.code .chip{color:var(--violet);border-color:rgba(139,123,255,.3);background:rgba(139,123,255,.08)}
+  .card .b{padding:12px 14px}
+  .card .k{font-family:"JetBrains Mono",monospace;font-size:12.5px;color:var(--text);font-weight:600}
+  .card .h{font-size:12px;color:var(--faint);margin-top:4px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+  .card .type{display:inline-block;margin-top:9px;font-size:10.5px;font-weight:600;color:var(--muted);background:var(--surface);border:1px solid var(--border-1);padding:3px 8px;border-radius:6px}
+  .empty{grid-column:1/-1;text-align:center;color:var(--muted);padding:40px;border:1px dashed var(--border-1);border-radius:var(--r)}
+  .spin{width:16px;height:16px;border:2px solid rgba(255,255,255,.25);border-top-color:#fff;border-radius:50%;animation:sp .7s linear infinite}
+  @keyframes sp{to{transform:rotate(360deg)}}
+
+  footer{border-top:1px solid var(--border-1);padding:26px 0;color:var(--faint);font-size:13px}
+  .foot-in{display:flex;justify-content:space-between;gap:14px;flex-wrap:wrap;align-items:center}
+
+  @media (max-width:820px){
+    .steps{grid-template-columns:repeat(2,1fr)}
+    .step .d{display:none}
+    .grid-2{grid-template-columns:1fr}
+    .hero{padding:44px 0 20px}
+  }
+  @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="wrap top-in">
+    <div class="brand">
+      <span class="logo" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="7" r="1.5" fill="currentColor"/><circle cx="6.5" cy="16.5" r="1.5" fill="currentColor"/><circle cx="17.5" cy="16.5" r="1.5" fill="currentColor"/><path stroke="currentColor" stroke-width="1.6" d="M15.25 8.88a3.75 3.75 0 1 0-5.13-3.75 3.75 3.75 0 1 0-3.75 6.5M6.5 12.75a3.75 3.75 0 1 0 3.75 3.75h7.25M14.25 18.38a3.75 3.75 0 1 0 1.37-5.13"/></svg></span>
+      <span>n8n Course Studio<small class="mm">Burmese Lesson Pipeline</small></span>
+    </div>
+    <div class="top-sp"></div>
+    <span class="pill"><span class="dot"></span> Pipeline online</span>
+    <a class="btn-ghost" href="https://n8n.srv1695682.hstgr.cloud" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3h7v7"/><path d="M10 14 21 3"/><path d="M21 14v5a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5"/></svg> Open n8n</a>
+  </div>
+</header>
+
+<section class="hero wrap">
+  <span class="kicker">✦ AI VIDEO PIPELINE</span>
+  <h1>n8n သင်ခန်းစာတွေကို<br><span class="g">မြန်မာ course video</span> အဖြစ် ထုတ်ပါ</h1>
+  <p class="mm">Script ရေး → Voiceover → Visual Script → Render → QA — အဆင့်တိုင်းကို AI နဲ့ pipeline တစ်ခုတည်းမှာ။ Gemini + Remotion + n8n တို့နဲ့ တည်ဆောက်ထားတယ်။</p>
+  <div class="cta">
+    <a class="btn primary" href="#studio"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg> Studio စတင်မယ်</a>
+    <a class="btn subtle" href="#library">Component library ကြည့်မယ်</a>
+  </div>
+  <div class="stat-row">
+    <div><b id="s-comp">12</b> reusable components</div>
+    <div><b>7</b> pipeline actions</div>
+    <div><b>100%</b> Burmese-first</div>
+  </div>
+</section>
+
+<main class="studio wrap" id="studio">
+  <div class="steps" role="tablist" aria-label="Pipeline steps">
+    <button class="step" role="tab" aria-selected="true" data-tab="script"><span class="n">1</span><span class="t">Script</span><span class="d mm">AI script ရေး</span></button>
+    <button class="step" role="tab" aria-selected="false" data-tab="voiceover"><span class="n">2</span><span class="t">Voiceover</span><span class="d mm">အသံထွက်</span></button>
+    <button class="step" role="tab" aria-selected="false" data-tab="visual"><span class="n">3</span><span class="t">Visual Script</span><span class="d mm">Scene ဆောက်</span></button>
+    <button class="step" role="tab" aria-selected="false" data-tab="render"><span class="n">4</span><span class="t">Final Render</span><span class="d mm">Video ထုတ်</span></button>
+    <button class="step" role="tab" aria-selected="false" data-tab="library"><span class="n">5</span><span class="t">Library</span><span class="d mm">Components</span></button>
+  </div>
+
+  <!-- 1. Script -->
+  <section class="panel on" id="p-script" role="tabpanel">
+    <div class="panel-h">
+      <span class="ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M16 13H8M16 17H8M10 9H8"/></svg></span>
+      <div><h2>Script Generator</h2><p class="mm">Lesson outline ကနေ Gemini က script ရေးပေးမယ်</p></div>
+    </div>
+    <div class="panel-b">
+      <div class="grid-2">
+        <div class="field"><label for="s-id">Lesson ID</label><input id="s-id" type="number" value="1" min="1"></div>
+        <div class="field"><label for="s-style">Style</label><select id="s-style"><option>calm</option><option>excited</option><option>technical</option></select></div>
+      </div>
+      <div class="field"><label for="s-title">Lesson Title <span class="hint">(optional)</span></label><input id="s-title" type="text" placeholder="auto-fill from outline"></div>
+      <div class="field"><label for="s-dur">Duration (min)</label><input id="s-dur" type="number" value="8" min="1"></div>
+      <div class="actions"><button class="btn primary" data-run="script" data-out="o-script"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 3v4M3 5h4M6 17v4M4 19h4M13 3l3.5 8.5L25 15l-8.5 3.5L13 27l-3.5-8.5L1 15l8.5-3.5z" transform="scale(.8) translate(2 1)"/></svg> Generate Script</button></div>
+      <pre class="out" id="o-script" aria-live="polite">Generated script will appear here…</pre>
+    </div>
+  </section>
+
+  <!-- 2. Voiceover -->
+  <section class="panel" id="p-voiceover" role="tabpanel">
+    <div class="panel-h">
+      <span class="ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2M12 19v3"/></svg></span>
+      <div><h2>Voiceover</h2><p class="mm">Script ကို TTS voiceover (Charon · 24kHz) အဖြစ် ထုတ်</p></div>
+    </div>
+    <div class="panel-b">
+      <div class="grid-2">
+        <div class="field"><label for="v-id">Lesson ID</label><input id="v-id" type="number" value="1" min="1"></div>
+        <div class="field"><label for="v-style">Style</label><select id="v-style"><option>calm</option><option>excited</option><option>technical</option><option>warning</option></select></div>
+      </div>
+      <div class="field"><label for="v-text">Script Text</label><textarea id="v-text" placeholder="Paste/edit script…"></textarea><span class="hint mm">1500 chars ကျော်ရင် auto-split လုပ်ပြီး single WAV ပြန်တွဲပေးမယ်။</span></div>
+      <div class="actions"><button class="btn primary" data-run="audio" data-out="o-voice"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg> Generate Voiceover</button></div>
+      <pre class="out" id="o-voice" aria-live="polite">Audio result will appear here…</pre>
+    </div>
+  </section>
+
+  <!-- 3. Visual Script -->
+  <section class="panel" id="p-visual" role="tabpanel">
+    <div class="panel-h">
+      <span class="ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg></span>
+      <div><h2>Visual Script</h2><p class="mm">Audio → transcript → Remotion scene JSON</p></div>
+    </div>
+    <div class="panel-b">
+      <div class="grid-2">
+        <div class="field"><label for="vs-id">Lesson ID</label><input id="vs-id" type="number" value="1" min="1"></div>
+        <div class="field"><label for="vs-audio">Audio URL (final WAV)</label><input id="vs-audio" type="text" placeholder="raw .wav URL"></div>
+      </div>
+      <div class="actions">
+        <button class="btn primary" data-run="visual_script" data-out="o-visual"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v18M3 12h18"/></svg> Generate Visual Script</button>
+        <button class="btn subtle" data-run="plan_scenes" data-out="o-visual">Plan scenes</button>
+      </div>
+      <pre class="out" id="o-visual" aria-live="polite">Scene JSON will appear here for review…</pre>
+    </div>
+  </section>
+
+  <!-- 4. Final Render -->
+  <section class="panel" id="p-render" role="tabpanel">
+    <div class="panel-h">
+      <span class="ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m22 8-6 4 6 4V8z"/><rect x="2" y="6" width="14" height="12" rx="2"/></svg></span>
+      <div><h2>Final Render</h2><p class="mm">Approved scene + audio ကို Remotion နဲ့ MP4 render</p></div>
+    </div>
+    <div class="panel-b">
+      <div class="grid-2">
+        <div class="field"><label for="r-id">Lesson ID</label><input id="r-id" type="number" value="1" min="1"></div>
+        <div class="field"><label for="r-audio">Audio URL</label><input id="r-audio" type="text" placeholder="https://…/audio/lesson_X.wav"></div>
+      </div>
+      <div class="actions">
+        <button class="btn primary" data-run="final_render" data-out="o-render"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg> Render Final Video</button>
+        <button class="btn subtle" data-run="preview_render" data-out="o-render">Preview (0.33×)</button>
+        <button class="btn subtle" data-run="qa_check" data-out="o-render">QA check</button>
+      </div>
+      <pre class="out" id="o-render" aria-live="polite">Render result / VPS path will appear here…</pre>
+    </div>
+  </section>
+
+  <!-- 5. Component Library -->
+  <section class="panel" id="p-library" role="tabpanel">
+    <div class="panel-h" id="library">
+      <span class="ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><path d="m3.3 7 8.7 5 8.7-5M12 22V12"/></svg></span>
+      <div style="flex:1"><h2>Component Library</h2><p class="mm">Pipeline က ဆောက်ထားတဲ့ n8n UI components</p></div>
+      <button class="btn subtle" id="refresh"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0 1 15-6.7L21 8M21 3v5h-5M21 12a9 9 0 0 1-15 6.7L3 16M3 21v-5h5"/></svg> Refresh</button>
+    </div>
+    <div class="panel-b">
+      <div class="lib-bar"><span class="lib-count" id="lib-count">Loading…</span></div>
+      <div class="lib-grid" id="lib-grid"><div class="empty mm">Refresh နှိပ်ပြီး library load လုပ်ပါ။</div></div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap foot-in">
+    <span class="mm">© 2026 moehtetofficial · n8n Course Studio</span>
+    <span>Gemini · Remotion · n8n</span>
+  </div>
+</footer>
+
+<script>
+  const WEBHOOK="https://n8n.srv1695682.hstgr.cloud/webhook/4cafc325-fcd9-4f1e-9175-2a6753238213/n8n-course-voiceover";
+  const REGISTRY="https://raw.githubusercontent.com/moehtetofficial/n8n-remotion-library/main/src/components/generated/registry.json";
+  const $=(s,r=document)=>r.querySelector(s), $$=(s,r=document)=>[...r.querySelectorAll(s)];
+
+  // Tabs
+  const tabs=$$(".step"), panels={script:"p-script",voiceover:"p-voiceover",visual:"p-visual",render:"p-render",library:"p-library"};
+  function select(id){
+    tabs.forEach(t=>t.setAttribute("aria-selected",String(t.dataset.tab===id)));
+    Object.entries(panels).forEach(([k,pid])=>$("#"+pid).classList.toggle("on",k===id));
+    if(id==="library") loadLibrary();
+  }
+  tabs.forEach(t=>t.addEventListener("click",()=>select(t.dataset.tab)));
+
+  // Run action
+  function payloadFor(action){
+    const n=id=>Number($("#"+id)?.value||0), v=id=>($("#"+id)?.value||"").trim();
+    switch(action){
+      case "script": return {action,lesson_id:n("s-id"),lesson_title:v("s-title"),duration_min:n("s-dur"),style:v("s-style")};
+      case "audio": return {action,lesson_id:n("v-id"),style:v("v-style"),script_text:v("v-text")};
+      case "visual_script": case "plan_scenes": return {action,lesson_id:n("vs-id"),audio_url:v("vs-audio")};
+      case "final_render": case "preview_render": case "qa_check": return {action,lesson_id:n("r-id"),audio_url:v("r-audio")};
+      default: return {action};
+    }
+  }
+  $$("[data-run]").forEach(btn=>btn.addEventListener("click",async()=>{
+    const action=btn.dataset.run, out=$("#"+btn.dataset.out), label=btn.innerHTML;
+    btn.disabled=true; btn.innerHTML='<span class="spin"></span> Running…'; out.textContent="⏳ "+action+" — sending to pipeline…";
+    try{
+      const res=await fetch(WEBHOOK,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(payloadFor(action))});
+      const txt=await res.text(); let pretty=txt;
+      try{pretty=JSON.stringify(JSON.parse(txt),null,2);}catch(_){}
+      out.textContent=(res.ok?"✅ ":"⚠️ "+res.status+" ")+"\n"+pretty;
+    }catch(e){out.textContent="❌ "+e.message+"\n(CORS ဖြစ်နိုင် — n8n webhook မှာ origin allow လုပ်ပါ)";}
+    finally{btn.disabled=false; btn.innerHTML=label;}
+  }));
+
+  // Component library
+  let libLoaded=false;
+  async function loadLibrary(force){
+    if(libLoaded&&!force) return;
+    const grid=$("#lib-grid"), count=$("#lib-count");
+    count.textContent="Loading…"; grid.innerHTML='<div class="empty mm">Loading components…</div>';
+    try{
+      const r=await fetch(REGISTRY+"?cb="+Date.now());
+      const reg=await r.json(); const comps=reg.components||{};
+      const keys=Object.keys(comps); libLoaded=true;
+      $("#s-comp").textContent=keys.length;
+      count.textContent=keys.length+" components · updated "+((reg._meta&&reg._meta.updated)||"").slice(0,10);
+      grid.innerHTML = keys.length? keys.map(k=>{
+        const c=comps[k], code=c.type==="tsx";
+        return `<article class="card"><div class="prev ${code?'code':''}"><span class="chip">${code?'{ } tsx':'▢ '+(c.mockup||c.type||'json')}</span></div>
+        <div class="b"><div class="k">${k}</div><div class="h">${(c.hint||'').replace(/</g,'&lt;')||'—'}</div><span class="type">${c.type}</span></div></article>`;
+      }).join("") : '<div class="empty mm">Component မရှိသေးပါ။</div>';
+    }catch(e){ count.textContent="Failed to load"; grid.innerHTML='<div class="empty">⚠️ '+e.message+'</div>'; }
+  }
+  $("#refresh").addEventListener("click",()=>loadLibrary(true));
+  // preload count for hero stat
+  loadLibrary();
+</script>
+</body>
+</html>
